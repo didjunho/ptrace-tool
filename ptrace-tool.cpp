@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         raise(SIGSTOP);
 
         char* envp_child[] = {nullptr};
-        if (execvp("phosphor-hwmon-readd", argv, envp_child) < 0) {
+        if (execvp("phosphor-hwmon-readd", argv) < 0) {
             std::perror("execve error");
             exit(EXIT_FAILURE);
         }
