@@ -118,6 +118,5 @@ int main(int argc, char** argv) {
             cout << "POST2: " << pid << " " << ptrace(PTRACE_PEEKUSER, pid, sizeof(long)) << endl;
         }
     }
-
     return 0;
 }
