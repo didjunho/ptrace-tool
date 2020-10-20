@@ -20,11 +20,11 @@ using namespace std;
 
 int main(int argc, char** argv) {
     ifstream inFile;
-    long sensor_val;
+    long sensor_val = 9999;
     inFile.open("reading.txt");
     cout << "SENSOR ADDRESS: " << &sensor_val << endl;
     inFile >> sensor_val;
-    cout << "SENSOR: " << sensor_val << endl;
     inFile.close();
+    cout << "SENSOR: " << sensor_val << endl;
     return 0;
 }

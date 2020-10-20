@@ -79,24 +79,26 @@ int main(int argc, char** argv) {
             }
 
             // pre-execution
-            fprintf(stdout, "%ld(%ld, %ld, %ld, %ld, %ld, %ld)\n",
+            fprintf(stdout, "%ld(%ld, %ld, %ld, %ld, %ld, %ld)",
                     syscall,
                     (long)regs.rdi, (long)regs.rsi, (long)regs.rdx,
                     (long)regs.r10, (long)regs.r8,  (long)regs.r9);
-            
+
+            // post-execution, get result
+            ptrace(PTRACE_SYSCALL, pid, 0, 0);
+            waitpid(pid, &wstatus, 0);
+
+            ptrace(PTRACE_GETREGS, pid, 0, &regs);
+            fprintf(stdout, " = %ld\n", (long)regs.rax);
+
             if (regs.rdx == 8191) {
-                long child_val;
-                int i;
-                child_val = (long) ptrace(PTRACE_PEEKUSER, pid, sizeof(long));
                 long replace_val = 5678;
                 
-                if (child_val) {
-                    cout << "CHILD VAL: " << std::hex << child_val << endl;
-                    if (child_val < 5000) {
-                        cout << "POKING" << endl;
-                        ptrace(PTRACE_POKEUSER, pid, sizeof(long), replace_val);
-                        cout << "POKED: " << ptrace(PTRACE_PEEKUSER, pid, sizeof(long)) << endl;
-                    }
+                if (regs.rsi) {
+                    cout << std::hex << "POKING: " << regs.rsi << endl;
+                    ptrace(PTRACE_POKEDATA, pid, (void*)regs.rsi, (void*)replace_val);
+
+                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, (void*)regs.rsi) << endl;
                 }
                 else {
                     cout << "PEEKTEXT ERROR" << endl;
@@ -105,17 +107,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
-            waitpid(pid, &wstatus, 0);
-
-            if (regs.rdx == 8191) {
-                cout << "POST: " << pid << " " << ptrace(PTRACE_PEEKUSER, pid, sizeof(long)) << endl;
-            }
-
-            ptrace(PTRACE_SYSCALL, pid, 0, 0);
-
-            cout << "POST2: " << pid << " " << ptrace(PTRACE_PEEKUSER, pid, sizeof(long)) << endl;
         }
     }
     return 0;
