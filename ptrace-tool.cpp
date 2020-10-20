@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     }
     
     if (pid == 0) {
-        if (ptrace(PTRACE_TRACEME, pid, nullptr, 0) < 0) {
+        if (ptrace(PT_TRACE_ME, pid, nullptr, 0) < 0) {
             std::perror("ptrace(PTRACE_TRACEME) error");
             exit(EXIT_FAILURE);
         }
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         raise(SIGSTOP);
 
         char* envp_child[] = {nullptr};
-        if (execvp("phosphor-hwmon-readd", argv) < 0) {
+        if (execve("read", argv, envp_child) < 0) {
             std::perror("execve error");
             exit(EXIT_FAILURE);
         }
@@ -49,11 +49,11 @@ int main(int argc, char** argv) {
         }
         else {
             cout << "other stop" << endl;
-            ptrace(PTRACE_CONT, pid, (caddr_t)1, 0);
+            ptrace(PT_CONTINUE, pid, (caddr_t)1, 0);
         }
     }
 
-    ptrace(PTRACE_CONT, pid, (caddr_t)1, 0);
+    ptrace(PT_CONTINUE, pid, (caddr_t)1, 0);
     while (true) {
         waitpid(pid, &wstatus, 0);
         if (WIFEXITED(wstatus)) {
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
         }
         else {
             cout << "other stop" << endl;
-            ptrace(PTRACE_CONT, pid, (caddr_t)1, 0);
+            ptrace(PT_CONTINUE, pid, (caddr_t)1, 0);
         }
     }
 

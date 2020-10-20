@@ -1,0 +1,45 @@
+dtrace: system integrity protection is on, some features will not be available
+
+SYSCALL(args) 		 = return
+1234
+open("/dev/dtracehelper\0", 0x2, 0xFFFFFFFFE62F0060)		 = 3 0
+ioctl(0x3, 0x80086804, 0x7FFEE62EFF70)		 = 0 0
+close(0x3)		 = 0 0
+mprotect(0x109914000, 0x1000, 0x1)		 = 0 0
+access("/AppleInternal/XBS/.isChrooted\0", 0x0, 0x0)		 = -1 2
+bsdthread_register(0x7FFF7367DB7C, 0x7FFF7367DB68, 0x2000)		 = 1073742047 0
+sysctlbyname(kern.bootargs, 0xD, 0x7FFEE62EF0E0, 0x7FFEE62EF0D0, 0x0)		 = 0 0
+issetugid(0x0, 0x0, 0x0)		 = 0 0
+ioctl(0x2, 0x4004667A, 0x7FFEE62EF424)		 = 0 0
+mprotect(0x10991E000, 0x1000, 0x0)		 = 0 0
+mprotect(0x109928000, 0x1000, 0x0)		 = 0 0
+mprotect(0x109929000, 0x1000, 0x0)		 = 0 0
+mprotect(0x109933000, 0x1000, 0x0)		 = 0 0
+mprotect(0x10991C000, 0x90, 0x1)		 = 0 0
+mprotect(0x109934000, 0x1000, 0x1)		 = 0 0
+mprotect(0x10991C000, 0x90, 0x3)		 = 0 0
+mprotect(0x10991C000, 0x90, 0x1)		 = 0 0
+getentropy(0x7FFEE62EE950, 0x20, 0x0)		 = 0 0
+getentropy(0x7FFEE62EE9A0, 0x40, 0x0)		 = 0 0
+getpid(0x0, 0x0, 0x0)		 = 2022 0
+stat64("/AppleInternal\0", 0x7FFEE62EF550, 0x0)		 = -1 2
+csops_audittoken(0x7E6, 0x7, 0x7FFEE62EF0A0)		 = -1 22
+proc_info(0x2, 0x7E6, 0xD)		 = 64 0
+csops_audittoken(0x7E6, 0x7, 0x7FFEE62EE920)		 = -1 22
+getrlimit(0x1008, 0x7FFEE62F07C0, 0x0)		 = 0 0
+open_nocancel("reading.txt\0", 0x0, 0x1B6)		 = 3 0
+
+
+// this is the read
+fstat64(0x3, 0x7FFEE62F0598, 0x0)		 = 0 0
+dtrace: error on enabled probe ID 2187 (ID 951: syscall::read_nocancel:return): invalid kernel access in action #12 at DIF offset 68
+dtrace: error on enabled probe ID 2187 (ID 951: syscall::read_nocancel:return): invalid kernel access in action #12 at DIF offset 68
+lseek(0x3, 0x0, 0x1)		 = 4 0
+lseek(0x3, 0x0, 0x0)		 = 0 0
+lseek(0x3, 0x4, 0x0)		 = 4 0
+
+
+close_nocancel(0x3)		 = 0 0
+fstat64(0x1, 0x7FFEE62F05D8, 0x0)		 = 0 0
+ioctl(0x1, 0x4004667A, 0x7FFEE62F0624)		 = 0 0
+dtrace: error on enabled probe ID 2185 (ID 953: syscall::write_nocancel:return): invalid kernel access in action #12 at DIF offset 68

@@ -3,6 +3,7 @@
         "iostream": "cpp",
         "__config": "cpp",
         "__nullptr": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iosfwd": "cpp"
     }
 }
