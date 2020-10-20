@@ -1,34 +1,61 @@
-dtrace: system integrity protection is on, some features will not be available
-
-SYSCALL(args) 		 = return
-229376
-open("/dev/dtracehelper\0", 0x2, 0xFFFFFFFFE130C060)		 = 3 0
-ioctl(0x3, 0x80086804, 0x7FFEE130BF70)		 = 0 0
-close(0x3)		 = 0 0
-mprotect(0x10E8F8000, 0x1000, 0x1)		 = 0 0
-access("/AppleInternal/XBS/.isChrooted\0", 0x0, 0x0)		 = -1 2
-bsdthread_register(0x7FFF7367DB7C, 0x7FFF7367DB68, 0x2000)		 = 1073742047 0
-sysctlbyname(kern.bootargs, 0xD, 0x7FFEE130B0E0, 0x7FFEE130B0D0, 0x0)		 = 0 0
-issetugid(0x0, 0x0, 0x0)		 = 0 0
-ioctl(0x2, 0x4004667A, 0x7FFEE130B424)		 = 0 0
-mprotect(0x10E902000, 0x1000, 0x0)		 = 0 0
-mprotect(0x10E90C000, 0x1000, 0x0)		 = 0 0
-mprotect(0x10E90D000, 0x1000, 0x0)		 = 0 0
-mprotect(0x10E917000, 0x1000, 0x0)		 = 0 0
-mprotect(0x10E900000, 0x90, 0x1)		 = 0 0
-mprotect(0x10E918000, 0x1000, 0x1)		 = 0 0
-mprotect(0x10E900000, 0x90, 0x3)		 = 0 0
-mprotect(0x10E900000, 0x90, 0x1)		 = 0 0
-getentropy(0x7FFEE130A950, 0x20, 0x0)		 = 0 0
-getentropy(0x7FFEE130A9A0, 0x40, 0x0)		 = 0 0
-getpid(0x0, 0x0, 0x0)		 = 2174 0
-stat64("/AppleInternal\0", 0x7FFEE130B550, 0x0)		 = -1 2
-csops_audittoken(0x87E, 0x7, 0x7FFEE130B0A0)		 = -1 22
-proc_info(0x2, 0x87E, 0xD)		 = 64 0
-csops_audittoken(0x87E, 0x7, 0x7FFEE130A920)		 = -1 22
-getrlimit(0x1008, 0x7FFEE130C7C0, 0x0)		 = 0 0
-open_nocancel("reading.txt\0", 0x0, 0x1B6)		 = 3 0
-close_nocancel(0x3)		 = 0 0
-fstat64(0x1, 0x7FFEE130C5D8, 0x0)		 = 0 0
-ioctl(0x1, 0x4004667A, 0x7FFEE130C624)		 = 0 0
-dtrace: error on enabled probe ID 2185 (ID 953: syscall::write_nocancel:return): invalid kernel access in action #12 at DIF offset 68
+execve("./read", ["./read"], 0x7fffe1b47bc0 /* 19 vars */) = 0
+brk(NULL)                               = 0x7fffc4b23000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+fstat(3, {st_mode=S_IFREG|0644, st_size=62069, ...}) = 0
+mmap(NULL, 62069, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7fe001d2e000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\220\304\10\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0644, st_size=1594864, ...}) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fe001d20000
+mmap(NULL, 3702848, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fe001670000
+mprotect(0x7fe0017e9000, 2097152, PROT_NONE) = 0
+mmap(0x7fe0019e9000, 49152, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x179000) = 0x7fe0019e9000
+mmap(0x7fe0019f5000, 12352, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fe0019f5000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\300*\0\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0644, st_size=96616, ...}) = 0
+mmap(NULL, 2192432, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fe001450000
+mprotect(0x7fe001467000, 2093056, PROT_NONE) = 0
+mmap(0x7fe001666000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x16000) = 0x7fe001666000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\260\34\2\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0755, st_size=2030544, ...}) = 0
+mmap(NULL, 4131552, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fe001050000
+mprotect(0x7fe001237000, 2097152, PROT_NONE) = 0
+mmap(0x7fe001437000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e7000) = 0x7fe001437000
+mmap(0x7fe00143d000, 15072, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x7fe00143d000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\200\272\0\0\0\0\0\0"..., 832) = 832
+fstat(3, {st_mode=S_IFREG|0644, st_size=1700792, ...}) = 0
+mmap(NULL, 3789144, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x7fe000cb0000
+mprotect(0x7fe000e4d000, 2093056, PROT_NONE) = 0
+mmap(0x7fe00104c000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x19c000) = 0x7fe00104c000
+close(3)                                = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fe001d10000
+arch_prctl(ARCH_SET_FS, 0x7fe001d10d80) = 0
+mprotect(0x7fe001437000, 16384, PROT_READ) = 0
+mprotect(0x7fe00104c000, 4096, PROT_READ) = 0
+mprotect(0x7fe001666000, 4096, PROT_READ) = 0
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fe001d00000
+mprotect(0x7fe0019e9000, 40960, PROT_READ) = 0
+mprotect(0x7fe002001000, 4096, PROT_READ) = 0
+mprotect(0x7fe001c27000, 4096, PROT_READ) = 0
+munmap(0x7fe001d2e000, 62069)           = 0
+brk(NULL)                               = 0x7fffc4b23000
+brk(0x7fffc4b44000)                     = 0x7fffc4b44000
+openat(AT_FDCWD, "reading.txt", O_RDONLY) = 3
+read(3, "1234", 8191)                   = 4
+read(3, "", 8191)                       = 0
+close(3)                                = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

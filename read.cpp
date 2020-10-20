@@ -22,8 +22,9 @@ int main(int argc, char** argv) {
     ifstream inFile;
     long sensor_val;
     inFile.open("reading.txt");
-    // inFile >> sensor_val;
+    cout << "SENSOR ADDRESS: " << &sensor_val << endl;
+    inFile >> sensor_val;
+    cout << "SENSOR: " << sensor_val << endl;
     inFile.close();
-    cout << sensor_val << endl;
     return 0;
 }
