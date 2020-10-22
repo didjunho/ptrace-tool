@@ -3,6 +3,9 @@
 #include <thread>
 #include <fstream>
 #include <string>
+#include <cstdio>
+#include <unistd.h>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -27,4 +30,12 @@ int main(int argc, char** argv) {
     inFile.close();
     cout << "SENSOR: " << sensor_val << endl;
     return 0;
+}
+
+int main2(int argc, char** argv) {
+  int fd = open("reading.txt", O_RDONLY);
+  char sensor_val[8192];
+  printf("%d\n",read(fd, (void*)&sensor_val, 8191));
+  write(0, sensor_val, 4);
+  return 0;
 }

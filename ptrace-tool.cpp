@@ -7,7 +7,7 @@
 #include <sys/syscall.h>
 #include <sys/user.h>
 #include <unistd.h>
-
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
             std::perror("ptrace(PTRACE_TRACEME) error");
             exit(EXIT_FAILURE);
         }
-
+        //read(file descriptor, char* buffer, num_bytes) ssize_t
         // waiting for parent 
         raise(SIGSTOP);
 
@@ -92,11 +92,13 @@ int main(int argc, char** argv) {
             fprintf(stdout, " = %ld\n", (long)regs.rax);
 
             if (regs.rdx == 8191) {
-                long replace_val = 5678;
-                
+                char replace_val[5] = "5678";
+                long new_sensor_val;
+                memcpy(&new_sensor_val, replace_val, 4);
+
                 if (regs.rsi) {
-                    cout << std::hex << "POKING: " << regs.rsi << endl;
-                    ptrace(PTRACE_POKEDATA, pid, (void*)regs.rsi, (void*)replace_val);
+                    cout << "POKING ADDRESS: " << regs.rsi << endl;
+                    ptrace(PTRACE_POKEDATA, pid, regs.rsi, new_sensor_val);
 
                     cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, (void*)regs.rsi) << endl;
                 }
