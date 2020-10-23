@@ -25,7 +25,6 @@ int main(int argc, char** argv) {
     ifstream inFile;
     long sensor_val = 9999;
     inFile.open("reading.txt");
-    cout << "SENSOR ADDRESS: " << &sensor_val << endl;
     inFile >> sensor_val;
     inFile.close();
     cout << "SENSOR: " << sensor_val << endl;
@@ -35,7 +34,8 @@ int main(int argc, char** argv) {
 int main2(int argc, char** argv) {
   int fd = open("reading.txt", O_RDONLY);
   char sensor_val[8192];
-  printf("%d\n",read(fd, (void*)&sensor_val, 8191));
+  printf("BYTES READ: %d\n",read(fd, (void*)&sensor_val, 8191));
   write(0, sensor_val, 4);
+  write(0,"\n",1);
   return 0;
 }

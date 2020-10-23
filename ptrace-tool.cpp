@@ -13,16 +13,8 @@
 
 using namespace std;
 
-uint64_t swap_uint64( uint64_t val )
-{
-    val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
-    val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
-    return (val << 32) | (val >> 32);
-}
-
 int main(int argc, char** argv) {
     // initialize program
-    // cout << "initializing" << endl;
     pid_t pid = fork();
     if (pid != 0) {
         cout << pid << endl;
@@ -33,12 +25,12 @@ int main(int argc, char** argv) {
             std::perror("ptrace(PTRACE_TRACEME) error");
             exit(EXIT_FAILURE);
         }
-        //read(file descriptor, char* buffer, num_bytes) ssize_t
+
         // waiting for parent 
         raise(SIGSTOP);
 
-        char* envp_child[] = {nullptr};
-        if (execve("read", argv, envp_child) < 0) {
+        //char* envp_child[] = {nullptr};
+        if (execvp("phosphor-hwmon-readd", argv) < 0) {
             std::perror("execve error");
             exit(EXIT_FAILURE);
         }
@@ -91,23 +83,20 @@ int main(int argc, char** argv) {
             ptrace(PTRACE_GETREGS, pid, 0, &regs);
             fprintf(stdout, " = %ld\n", (long)regs.rax);
 
-            if (regs.rdx == 8191) {
-                char replace_val[5] = "5678";
+/*             if (regs.rdi == 3 && regs.rdx == 8191) {
+                char replace_val[5] = "8952";
                 long new_sensor_val;
                 memcpy(&new_sensor_val, replace_val, 4);
 
                 if (regs.rsi) {
-                    cout << "POKING ADDRESS: " << regs.rsi << endl;
                     ptrace(PTRACE_POKEDATA, pid, regs.rsi, new_sensor_val);
-
-                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, (void*)regs.rsi) << endl;
                 }
                 else {
                     cout << "PEEKTEXT ERROR" << endl;
                     ptrace(PTRACE_SYSCALL, pid, 0);
                     continue;
                 }
-            }
+            } */
 
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
         }
