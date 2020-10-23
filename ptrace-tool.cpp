@@ -1,12 +1,11 @@
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/wait.h>
-#include <sys/ptrace.h>
-#include <sys/syscall.h>
-#include <sys/user.h>
+#include <asm/types.h>
+#include <asm/ioctl.h>
+#include <asm/wait.h>
 #include <asm/ptrace.h>
+#include <asm/syscall.h>
+#include <asm/user.h>
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
