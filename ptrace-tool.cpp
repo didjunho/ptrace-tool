@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
                     ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs, new_sensor_val);
-                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0];
+                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
                 }
                 else {
                     cout << "ARG ERROR" << endl;
