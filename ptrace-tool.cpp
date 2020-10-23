@@ -4,7 +4,7 @@
 #include <asm/ioctl.h>
 #include <sys/wait.h>
 #include <asm/ptrace.h>
-#include <asm/syscall.h>
+#include <sys/syscall.h>
 #include <asm/user.h>
 #include <unistd.h>
 #include <cstring>
