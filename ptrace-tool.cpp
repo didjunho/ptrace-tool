@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         else {
             // syscall encountered
             struct pt_regs regs;
-            ptrace(PTRACE_GETREGS, pid, 0, &regs);
+            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
             long syscall = regs.uregs[7];
             if (regs.uregs[7] != 3) {
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
-            ptrace(PTRACE_GETREGS, pid, 0, &regs);
-            fprintf(stdout, " = %ld\n", regs.uregs[0];
+            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+            fprintf(stdout, " = %ld\n", regs.uregs[0]);
 
 /*             if (regs.rdi == 3 && regs.rdx == 8191) {
                 char replace_val[5] = "8952";
