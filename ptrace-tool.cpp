@@ -6,7 +6,7 @@
 #include <sys/ptrace.h>
 #include <sys/syscall.h>
 #include <sys/user.h>
-#include <asm-arm/ptrace.h>
+#include <asm/ptrace.h>
 #include <unistd.h>
 #include <cstring>
 #include <iostream>
