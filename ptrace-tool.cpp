@@ -80,8 +80,28 @@ int main(int argc, char** argv) {
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
-            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            fprintf(stdout, " = %ld\n", regs.uregs[0]);
+            if (regs.uregs[0] == 6 && regs.uregs[2] == 8191) {
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                fprintf(stdout, " = %ld\n", regs.uregs[0]);
+                char replace_val[5] = "5678";
+                long new_sensor_val;
+                memcpy(&new_sensor_val, replace_val, 4);
+
+                if (regs.uregs[1]) {
+                    cout << "POKING" << endl;
+                    ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
+                    regs.uregs[0] = 4;
+                }
+                else {
+                    cout << "ARG ERROR" << endl;
+                }
+            }
+            else {
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                fprintf(stdout, " = %ld\n", regs.uregs[0]);
+            }
+
+            
 
 /*             if (regs.rdi == 3 && regs.rdx == 8191) {
                 char replace_val[5] = "8952";
