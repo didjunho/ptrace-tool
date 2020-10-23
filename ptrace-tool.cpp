@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
-            if (regs.uregs[0] == 6 && regs.uregs[2] == 8191) {
+            if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 fprintf(stdout, " = %ld\n", regs.uregs[0]);
                 char replace_val[5] = "5678";
