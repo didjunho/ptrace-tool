@@ -62,26 +62,25 @@ int main(int argc, char** argv) {
         }
         else {
             // syscall encountered
-            struct user_regs_struct regs;
+            struct pt_regs regs;
             ptrace(PTRACE_GETREGS, pid, 0, &regs);
-            long syscall = regs.orig_rax;
-            if (regs.orig_rax != 0) {
+            long syscall = regs.uregs[7];
+            if (regs.uregs[7] != 3) {
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
 
             // pre-execution
-            fprintf(stdout, "%ld(%ld, %ld, %ld, %ld, %ld, %ld)",
+            fprintf(stdout, "%ld(%ld, %ld, %ld)",
                     syscall,
-                    (long)regs.rdi, (long)regs.rsi, (long)regs.rdx,
-                    (long)regs.r10, (long)regs.r8,  (long)regs.r9);
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
 
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
             ptrace(PTRACE_GETREGS, pid, 0, &regs);
-            fprintf(stdout, " = %ld\n", (long)regs.rax);
+            fprintf(stdout, " = %ld\n", regs.uregs[0];
 
 /*             if (regs.rdi == 3 && regs.rdx == 8191) {
                 char replace_val[5] = "8952";
