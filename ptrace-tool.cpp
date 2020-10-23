@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <asm/types.h>
 #include <asm/ioctl.h>
-#include <asm/wait.h>
+#include <sys/wait.h>
 #include <asm/ptrace.h>
 #include <asm/syscall.h>
 #include <asm/user.h>
