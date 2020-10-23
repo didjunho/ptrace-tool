@@ -88,9 +88,10 @@ int main(int argc, char** argv) {
                 memcpy(&new_sensor_val, replace_val, 4);
 
                 if (regs.uregs[1]) {
-                    cout << "POKING" << endl;
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
+                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs, new_sensor_val);
+                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0];
                 }
                 else {
                     cout << "ARG ERROR" << endl;
