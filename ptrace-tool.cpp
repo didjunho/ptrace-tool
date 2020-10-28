@@ -78,8 +78,8 @@ int main(int argc, char** argv) {
 
             // change syscall value to invalid value
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            regs.uregs[7] = -1
-            ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs)
+            regs.uregs[7] = -1;
+            ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
 
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
