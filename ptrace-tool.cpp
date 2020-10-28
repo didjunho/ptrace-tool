@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 regs.uregs[7] = -1;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
             }
 
             // post-execution, get result
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
             waitpid(pid, &wstatus, 0);
 
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
                 fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
                         regs.uregs[7],
                         regs.uregs[0], regs.uregs[1], regs.uregs[2]);
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
                 if (regs.uregs[1]) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
-                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
+                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
                     cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
                 }
                 else {
