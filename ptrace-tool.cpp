@@ -65,15 +65,14 @@ int main(int argc, char** argv) {
             // syscall encountered
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            long syscall = regs.uregs[7];
-            if (syscall != 3) {
+            if (regs.uregs[7] != 3) {
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
 
             // pre-execution
-            fprintf(stdout, "%ld(%ld, %ld, %ld)",
-                    syscall,
+            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)",
+                    regs.uregs[7],
                     regs.uregs[0], regs.uregs[1], regs.uregs[2]);
 
             // change syscall value to invalid value
@@ -84,6 +83,10 @@ int main(int argc, char** argv) {
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
+
+            fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
+                    regs.uregs[7],
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
 
             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
