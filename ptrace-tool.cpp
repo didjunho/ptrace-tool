@@ -71,22 +71,27 @@ int main(int argc, char** argv) {
             }
 
             // pre-execution
-            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)",
+            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
                     regs.uregs[7],
                     regs.uregs[0], regs.uregs[1], regs.uregs[2]);
 
             // change syscall value to invalid value
-            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            regs.uregs[7] = -1;
-            ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
+            if (regs.uregs[2] == 8191) {
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                regs.uregs[7] = -1;
+                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
+            }
 
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
-            fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
-                    regs.uregs[7],
-                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+            if (regs.uregs[2] == 8191) {
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
+                        regs.uregs[7],
+                        regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+            }
 
             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
