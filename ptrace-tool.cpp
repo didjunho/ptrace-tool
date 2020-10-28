@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
             long syscall = regs.uregs[7];
-            if (regs.uregs[7] != 3) {
+            if (syscall != 3) {
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
@@ -75,6 +75,11 @@ int main(int argc, char** argv) {
             fprintf(stdout, "%ld(%ld, %ld, %ld)",
                     syscall,
                     regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+
+            // change syscall value to invalid value
+            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+            regs.uregs[7] = -1
+            ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs)
 
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
                 if (regs.uregs[1]) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
-                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs, new_sensor_val);
+                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, regs.uregs);
                     cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
                 }
                 else {
