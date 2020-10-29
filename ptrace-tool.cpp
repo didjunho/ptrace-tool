@@ -30,7 +30,6 @@ int main(int argc, char** argv) {
         // waiting for parent 
         raise(SIGSTOP);
 
-        //char* envp_child[] = {nullptr};
         if (execvp("phosphor-hwmon-readd", argv) < 0) {
             std::perror("execve error");
             exit(EXIT_FAILURE);
@@ -42,18 +41,16 @@ int main(int argc, char** argv) {
 
     int wstatus;
     while (true) {
-        cout << "waiting for signal" << endl;
         waitpid(pid, &wstatus, 0);
-        cout << "return from waitpid with wstatus: " << wstatus << endl;
         if (WIFSTOPPED(wstatus) && WSTOPSIG(wstatus) == SIGSTOP) {
             break;
         }
         else {
-            cout << "other stop" << endl;
             ptrace(PTRACE_CONT, pid, (caddr_t)1, 0);
         }
     }
 
+    // start tracing
     ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, pid, 0, 0);
     while (true) {
@@ -71,70 +68,44 @@ int main(int argc, char** argv) {
             }
 
             // pre-execution
-            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
+/*             fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
                     regs.uregs[7],
-                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]); */
 
             // change syscall value to invalid value
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                regs.uregs[7] = -1;
-                //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
                 long new_syscall = -1;
                 ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 0, new_syscall);
             }
+
 
             // post-execution, get result
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
             waitpid(pid, &wstatus, 0);
 
-            if (regs.uregs[2] == 8191) {
+/*             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
                         regs.uregs[7],
                         regs.uregs[0], regs.uregs[1], regs.uregs[2]);
-                regs.uregs[7] = 3;
-                //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
-            }
+            } */
 
             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                fprintf(stdout, " = %ld\n", regs.uregs[0]);
                 char replace_val[5] = "5678";
                 long new_sensor_val;
                 memcpy(&new_sensor_val, replace_val, 4);
 
                 if (regs.uregs[1]) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
-                    regs.uregs[0] = 4;
-                    //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
-                    cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
+
+                    // will need to overload return value for error injection here
+                    //regs.uregs[0] = 4;
                 }
                 else {
                     cout << "ARG ERROR" << endl;
                 }
             }
-            else {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                fprintf(stdout, " = %ld\n", regs.uregs[0]);
-            }
-
-            
-
-/*             if (regs.rdi == 3 && regs.rdx == 8191) {
-                char replace_val[5] = "8952";
-                long new_sensor_val;
-                memcpy(&new_sensor_val, replace_val, 4);
-
-                if (regs.rsi) {
-                    ptrace(PTRACE_POKEDATA, pid, regs.rsi, new_sensor_val);
-                }
-                else {
-                    cout << "PEEKTEXT ERROR" << endl;
-                    ptrace(PTRACE_SYSCALL, pid, 0);
-                    continue;
-                }
-            } */
 
             ptrace(PTRACE_SYSCALL, pid, 0, 0);
         }
