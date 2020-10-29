@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
                         regs.uregs[7],
                         regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 regs.uregs[7] = 3;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
+                //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
             }
 
             if (regs.uregs[2] == 8191) {
