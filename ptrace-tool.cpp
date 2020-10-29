@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
             // change syscall value to invalid value
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
                 regs.uregs[7] = -1;
                 ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
             }
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
             }
 
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
                 fprintf(stdout, " = %ld\n", regs.uregs[0]);
                 char replace_val[5] = "5678";
                 long new_sensor_val;
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
                 }
             }
             else {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
                 fprintf(stdout, " = %ld\n", regs.uregs[0]);
             }
 
