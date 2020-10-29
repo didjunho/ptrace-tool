@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
                 if (regs.uregs[1]) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
-                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
+                    //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
                     cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
                 }
                 else {
