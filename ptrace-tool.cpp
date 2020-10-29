@@ -77,9 +77,9 @@ int main(int argc, char** argv) {
 
             // change syscall value to invalid value
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 regs.uregs[7] = -1;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
             }
 
             // post-execution, get result
@@ -87,16 +87,16 @@ int main(int argc, char** argv) {
             waitpid(pid, &wstatus, 0);
 
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 fprintf(stdout, "POST: %ld(%ld, %ld, %ld)",
                         regs.uregs[7],
                         regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 regs.uregs[7] = 3;
-                //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
             }
 
             if (regs.uregs[2] == 8191) {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 fprintf(stdout, " = %ld\n", regs.uregs[0]);
                 char replace_val[5] = "5678";
                 long new_sensor_val;
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
                 if (regs.uregs[1]) {
                     ptrace(PTRACE_POKEDATA, pid, regs.uregs[1], new_sensor_val);
                     regs.uregs[0] = 4;
-                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, regs.uregs);
+                    ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
                     cout << "POKED: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]) << ", return: " << regs.uregs[0] << endl;
                 }
                 else {
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
                 }
             }
             else {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, regs.uregs);
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 fprintf(stdout, " = %ld\n", regs.uregs[0]);
             }
 
