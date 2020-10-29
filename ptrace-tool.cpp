@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
             if (regs.uregs[2] == 8191) {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
                 regs.uregs[7] = -1;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
+                //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
             }
 
             // post-execution, get result
