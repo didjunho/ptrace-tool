@@ -93,6 +93,8 @@ int main(int argc, char** argv) {
                         regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 regs.uregs[7] = 3;
                 //ptrace(static_cast<__ptrace_request>(PTRACE_SETREGS), pid, 0, &regs);
+                long new_syscall = -1;
+                ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 0, new_syscall);
             }
 
             if (regs.uregs[2] == 8191) {
