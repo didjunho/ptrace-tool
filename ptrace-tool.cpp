@@ -62,21 +62,21 @@ int main(int argc, char** argv) {
             // syscall encountered
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            if (regs.uregs[7] != 3 && regs.uregs[7] != 5) {
-                fprintf(stdout, "INTERCEPTED: %ld(%ld, %ld, %ld)\n",
+            if (regs.uregs[7] != 3 && regs.uregs[7] != 322) {
+/*                 fprintf(stdout, "INTERCEPTED: %ld(%ld, %ld, %ld)\n",
                     regs.uregs[7],
                     regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 if (regs.uregs[7] == 5) {
                     cout << "FOUND AN OPEN CALL" << endl;
-                }
+                } */
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
 
-            if (regs.uregs[7] == 5) {
+            if (regs.uregs[7] == 322) {
                 // pre-execution
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                cout << "opening path: " << regs.uregs[0] << " ";
+                cout << "opening path: " << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1]); << " ";
 
                 // post-execution
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
