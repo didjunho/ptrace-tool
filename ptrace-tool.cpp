@@ -85,7 +85,11 @@ int main(int argc, char** argv) {
                     ss << std::hex << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1] + i*sizeof(long));
                     std::string path_chunk;
                     ss >> path_chunk;
-                    std::cout << "path chunk: " << path_chunk << std::endl;
+                    //std::cout << "path chunk: " << path_chunk << std::endl;
+                    
+                    if (path_chunk.size() != 8) {
+                        break;
+                    }
 
                     for (int j = 3; j >= 0; --j) {
                         char next_char = static_cast<char>(std::stoul(path_chunk.substr(j*2, 2), nullptr, 16));
