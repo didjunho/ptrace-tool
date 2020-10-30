@@ -83,9 +83,9 @@ int main(int argc, char** argv) {
             }
 
             // pre-execution
-/*             fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
+            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
                     regs.uregs[7],
-                    regs.uregs[0], regs.uregs[1], regs.uregs[2]); */
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
 
             // change syscall value to invalid value
             if (regs.uregs[2] == 8191) {
