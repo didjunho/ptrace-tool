@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
             if (regs.uregs[7] == 322) {
                 // pre-execution
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                cout << "opening path: " << static_cast<char*>(regs.uregs[1]) << " ";
+                cout << "opening path: " << reinterpret_cast<char*>(regs.uregs[1]) << " ";
 
                 // post-execution
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
