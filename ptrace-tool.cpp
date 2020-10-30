@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -76,8 +77,23 @@ int main(int argc, char** argv) {
             if (regs.uregs[7] == 322) {
                 // pre-execution
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                cout << "opening path: " << reinterpret_cast<char*>(regs.uregs[1]) << " ";
-                cout << "hex value: " << std::hex << (long)(ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1])) << " ";
+                int i = 0;
+                std::string path;
+                bool reached_end = false;
+                while (!reached_end) {
+                    std::stringstream ss;
+                    ss << std::hex << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1] + i*sizeof(long));
+                    for (int j = 3; j >= 0; --j) {
+                        char next_char = static_cast<char>(std::stoul(ss.substr(j*2, 2), nullptr, 16));
+                        if (next_char == '\0') {
+                            reached_end = true;
+                            break;
+                        }
+                        path += next_char;
+                    }
+                    ++i;
+                }
+                cout << "opening path: " << path << " ";
 
                 // post-execution
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
