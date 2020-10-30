@@ -63,6 +63,12 @@ int main(int argc, char** argv) {
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
             if (regs.uregs[7] != 3 && regs.uregs[7] != 5) {
+                fprintf(stdout, "INTERCEPTED: %ld(%ld, %ld, %ld)\n",
+                    regs.uregs[7],
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+                if (regs.uregs[7] == 5) {
+                    cout << "FOUND AN OPEN CALL" << endl;
+                }
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
@@ -83,9 +89,9 @@ int main(int argc, char** argv) {
             }
 
             // pre-execution
-            fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
+            /* fprintf(stdout, "PRE: %ld(%ld, %ld, %ld)\n",
                     regs.uregs[7],
-                    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
+                    regs.uregs[0], regs.uregs[1], regs.uregs[2]); */
 
             // change syscall value to invalid value
             if (regs.uregs[2] == 8191) {
