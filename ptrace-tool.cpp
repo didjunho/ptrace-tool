@@ -62,7 +62,22 @@ int main(int argc, char** argv) {
             // syscall encountered
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            if (regs.uregs[7] != 3) {
+            if (regs.uregs[7] != 3 || regs.uregs[7] != 5) {
+                ptrace(PTRACE_SYSCALL, pid, 0, 0);
+                continue;
+            }
+
+            if (regs.uregs[7] == 5) {
+                // pre-execution
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                cout << "opening path: " << regs[0] << " ";
+
+                // post-execution
+                ptrace(PTRACE_SYSCALL, pid, 0, 0);
+                waitpid(pid, &wstatus, 0);
+
+                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
+                cout << "with file descriptor: " << regs[0] << endl;
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
