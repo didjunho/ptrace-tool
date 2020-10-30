@@ -83,8 +83,11 @@ int main(int argc, char** argv) {
                 while (!reached_end) {
                     std::stringstream ss;
                     ss << std::hex << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1] + i*sizeof(long));
+                    std::string path_chunk;
+                    ss >> path_chunk;
+
                     for (int j = 3; j >= 0; --j) {
-                        char next_char = static_cast<char>(std::stoul(ss.substr(j*2, 2), nullptr, 16));
+                        char next_char = static_cast<char>(std::stoul(path_chunk.substr(j*2, 2), nullptr, 16));
                         if (next_char == '\0') {
                             reached_end = true;
                             break;
