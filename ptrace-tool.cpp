@@ -70,14 +70,14 @@ int main(int argc, char** argv) {
             if (regs.uregs[7] == 5) {
                 // pre-execution
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                cout << "opening path: " << regs[0] << " ";
+                cout << "opening path: " << regs.uregs[0] << " ";
 
                 // post-execution
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 waitpid(pid, &wstatus, 0);
 
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-                cout << "with file descriptor: " << regs[0] << endl;
+                cout << "with file descriptor: " << regs.uregs[0] << endl;
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
