@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
             // syscall encountered
             struct pt_regs regs;
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), pid, 0, &regs);
-            if (regs.uregs[7] != 3 || regs.uregs[7] != 5) {
+            if (regs.uregs[7] != 3 && regs.uregs[7] != 5) {
                 ptrace(PTRACE_SYSCALL, pid, 0, 0);
                 continue;
             }
