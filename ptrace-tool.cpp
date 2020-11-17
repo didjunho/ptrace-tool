@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -51,6 +52,7 @@ int main(int argc, char** argv) {
         }
     }
 
+
     // start tracing
     ptrace(PTRACE_SETOPTIONS, pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, pid, 0, 0);
@@ -85,7 +87,6 @@ int main(int argc, char** argv) {
                     ss << std::hex << ptrace(PTRACE_PEEKDATA, pid, regs.uregs[1] + i*sizeof(long));
                     std::string path_chunk;
                     ss >> path_chunk;
-                    //std::cout << "path chunk: " << path_chunk << std::endl;
                     
                     if (path_chunk.size() != 8) {
                         break;

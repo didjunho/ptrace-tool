@@ -1,7 +1,11 @@
-project('ptrace-tool', 'cpp', 
-    default_options : ['cpp_std=c++17', 'warning_level=2'])
+project('mock-sensor-tool', 'cpp', 
+    default_options : ['cpp_std=c++17', 
+                       'warning_level=2'])
 
-main_target_name = 'ptrace-tool'
-sources = ['ptrace-tool.cpp']
+main_target_name = 'mock-sensor-tool'
+sources = ['mock-sensor-tool.hpp',
+           'mock-sensor-tool.cpp',
+           'main.cpp']
 
-executable(main_target_name, sources, install: true)
+thread_dep = dependency('threads')
+executable(main_target_name, sources, dependencies: thread_dep, install: true)
