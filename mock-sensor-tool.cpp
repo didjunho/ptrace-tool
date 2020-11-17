@@ -111,14 +111,12 @@ void MockSensor::updateConfig(const int path_id)
 
 void MockSensor::init() 
 {
-    std::cout << "Mock sensor init" << std::endl;
     if (ptrace(PTRACE_ATTACH, _pid, 0, 0) < 0) 
     {
         std::perror("ptrace(PTRACE_ATTACH) error");
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "Mock sensor attached" << std::endl;
     int wstatus;
     while (true) 
     {
@@ -133,7 +131,6 @@ void MockSensor::init()
         }
     }
 
-    std::cout << "mock sensor trace start" << std::endl;
     ptrace(PTRACE_SETOPTIONS, _pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, _pid, 0, 0);
     while (true) 
@@ -146,7 +143,6 @@ void MockSensor::init()
         active_lock.unlock();
 
         waitpid(_pid, &wstatus, 0);
-        std::cout << "mock sensor signal overload" << std::endl;
         if (WIFEXITED(wstatus)) 
         {
             break;
@@ -156,6 +152,7 @@ void MockSensor::init()
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid, 0,
                    &regs);
 
+            std::cout << "intercepted call " << regs.uregs[7] << std::endl;
             if (regs.uregs[7] != SYS_READ && regs.uregs[7] != SYS_OPEN) 
             {
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
