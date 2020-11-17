@@ -1,6 +1,7 @@
 #include "mock-sensor-tool.hpp"
 
 #include <string.h>
+#include <sys/reg.h>
 
 #include <chrono>
 #include <sstream>
@@ -133,6 +134,7 @@ void MockSensor::init()
 
     ptrace(PTRACE_SETOPTIONS, _pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, _pid, 0, 0);
+
     while (true) 
     {
         std::unique_lock<std::mutex> active_lock(_is_active_mutex);
@@ -148,20 +150,19 @@ void MockSensor::init()
             break;
         }
         else {
-            struct pt_regs regs;
-            ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid, 0,
-                   &regs);
+            struct user_regs_struct regs;
+            ptrace(PTRACE_GETREGS, _pid, 0, &regs);
 
-            if (regs.uregs[7] != SYS_READ && regs.uregs[7] != SYS_OPEN) 
+            // 0 = READ, 257 = OPENAT for x86 64bit
+            if (regs.orig_rax != 0 && regs.orig_rax != 257) 
             {
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 continue;
             }
 
-            if (regs.uregs[7] == SYS_OPEN) 
+            if (regs.orig_rax == 257) 
             {
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
-                       0, &regs);
+                ptrace(PTRACE_GETREGS, _pid, 0, &regs);
                 int i = 0;
                 std::string path;
                 bool reached_end = false;
@@ -175,12 +176,14 @@ void MockSensor::init()
                     std::string path_chunk;
                     ss >> path_chunk;
                     
-                    if (path_chunk.size() != sizeof(long)*2) 
+                    // 16 for 64 bit, 8 for 32 bit
+                    if (path_chunk.size() != 16) 
                     {
                         break;
                     }
 
-                    for (int j = sizeof(long); j >= 0; --j) 
+                    // j = 7 for 64 bit, j = 3 for 32 bit
+                    for (int j = 7; j >= 0; --j) 
                     {
                         char next_char = static_cast<char>(
                             std::stoul(path_chunk.substr(j*2, 2), nullptr, 16)
@@ -199,11 +202,10 @@ void MockSensor::init()
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 waitpid(_pid, &wstatus, 0);
 
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid, 
-                       0, &regs);
+                ptrace(PTRACE_GETREGS, _pid, 0, &regs);
 
                 // update file descriptor to path mapping
-                _fd_to_path[regs.uregs[0]] = path;
+                _fd_to_path[regs.rax] = path;
 
                 std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
                 if (_sensor_configs.find(path) == _sensor_configs.end()) 
@@ -218,20 +220,19 @@ void MockSensor::init()
 
             // at this point, the call must be a read call
             std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
-            if (_fd_to_path.find(regs.uregs[0]) !=  _fd_to_path.end() && 
-                _sensor_configs[_fd_to_path[regs.uregs[0]]]._to_overload)
+            if (_fd_to_path.find(regs.rdi) !=  _fd_to_path.end() && 
+                _sensor_configs[_fd_to_path[regs.rdi]]._to_overload)
             {
-                std::string curr_path = _fd_to_path[regs.uregs[0]];
+                std::string curr_path = _fd_to_path[regs.rdi];
 
-                long new_syscall = -1;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 
-                       0, new_syscall);
+                // overload syscall here to avoid the limited bytes bug
+                //long new_syscall = -1;
+                //ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 0, new_syscall);
 
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 waitpid(_pid, &wstatus, 0);
 
-                ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
-                       0, &regs);
+                ptrace(PTRACE_GETREGS, _pid, 0, &regs);
 
                 // debug
                 //fprintf(stdout, "POST: %llu(%llu, %llu, %llu) = %llu\n",
@@ -242,7 +243,9 @@ void MockSensor::init()
                 if (_sensor_configs[curr_path]._set_error)
                 {
                     long error_return = -1;
-                    ptrace(PTRACE_POKEUSER, _pid, 0, error_return);
+                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long)*RAX, 
+                           error_return);
+
                     errno = _sensor_configs[curr_path]._errno_code;
                 }
                 // value injection
@@ -256,9 +259,9 @@ void MockSensor::init()
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
                     
-                    ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
-                    ptrace(PTRACE_POKEUSER, _pid, 0,
-                           _sensor_configs[curr_path]._overload_value.length());
+                    ptrace(PTRACE_POKEDATA, _pid, regs.rsi, new_sensor_val);
+                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long)*RAX,
+                        _sensor_configs[curr_path]._overload_value.length());
                 }
             }
 

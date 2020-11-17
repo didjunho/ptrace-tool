@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <sys/syscall.h>
 #include <sys/user.h>
 #include <unistd.h>
@@ -14,6 +15,9 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+
+static constexpr auto SYS_READ = 3;
+static constexpr auto SYS_OPEN = 322;
 
 /** @struct MockSensorSettings
  *  @brief Represents one user defined sensor configuration.

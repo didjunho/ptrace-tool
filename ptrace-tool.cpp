@@ -88,11 +88,11 @@ int main(int argc, char** argv) {
                     std::string path_chunk;
                     ss >> path_chunk;
                     
-                    if (path_chunk.size() != 8) {
+                    if (path_chunk.size() != sizeof(long)*2) {
                         break;
                     }
 
-                    for (int j = 3; j >= 0; --j) {
+                    for (int j = sizeof(long); j >= 0; --j) {
                         char next_char = static_cast<char>(std::stoul(path_chunk.substr(j*2, 2), nullptr, 16));
                         if (next_char == '\0') {
                             reached_end = true;
