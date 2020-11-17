@@ -161,6 +161,7 @@ void MockSensor::init()
 
             if (regs.uregs[7] == SYS_OPEN) 
             {
+                std::cout << "OPEN" << std::endl;
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
                 int i = 0;
@@ -181,7 +182,7 @@ void MockSensor::init()
                         break;
                     }
 
-                    for (int j = sizeof(long); j >= 0; --j) 
+                    for (int j = sizeof(long) - 1; j >= 0; --j) 
                     {
                         char next_char = static_cast<char>(
                             std::stoul(path_chunk.substr(j*2, 2), nullptr, 16)
