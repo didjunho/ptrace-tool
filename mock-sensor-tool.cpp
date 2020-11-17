@@ -152,7 +152,6 @@ void MockSensor::init()
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid, 0,
                    &regs);
 
-            std::cout << "intercepted call " << regs.uregs[7] << std::endl;
             if (regs.uregs[7] != SYS_READ && regs.uregs[7] != SYS_OPEN) 
             {
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
@@ -161,7 +160,6 @@ void MockSensor::init()
 
             if (regs.uregs[7] == SYS_OPEN) 
             {
-                std::cout << "OPEN" << std::endl;
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
                 int i = 0;
