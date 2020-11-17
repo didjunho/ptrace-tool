@@ -224,7 +224,7 @@ void MockSensor::init()
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
 
                 long new_syscall = -1;
-                ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 
+                ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), _pid, 
                        0, new_syscall);
 
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);

@@ -86,7 +86,6 @@ class MockSensor : MockSensorInterface
      * 
      *  @param[in] path_id - The path whose configs the user wants to update.
      */
-
     void updateConfig(const int path_id);
 
     /** @brief Retrieves all connected sensors and overloads sensor values
