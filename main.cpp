@@ -5,6 +5,6 @@ int main() {
     int pid;
     std::cout << "Enter PID of process to overload: ";
     std::cin >> pid;
-    MockSensor mock(pid);
+    MockSensor mock(static_cast<pid_t>(pid));
     return 0;
 }
