@@ -171,7 +171,7 @@ void MockSensor::init()
                 {
                     std::stringstream ss;
                     ss << std::hex << ptrace(PTRACE_PEEKDATA, _pid, 
-                                             regs.rsi + i*sizeof(long));
+                                             regs.uregs[1] + i*sizeof(long));
                     std::string path_chunk;
                     ss >> path_chunk;
                     
@@ -232,11 +232,6 @@ void MockSensor::init()
 
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
-
-                // debug
-                //fprintf(stdout, "POST: %llu(%llu, %llu, %llu) = %llu\n",
-                //        regs.orig_rax,
-                //        regs.rdi, regs.rsi, regs.rdx, regs.rax);
 
                 // error injection
                 if (_sensor_configs[curr_path]._set_error)
