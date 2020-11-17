@@ -254,6 +254,10 @@ void MockSensor::init()
                     ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
                     ptrace(PTRACE_POKEUSER, _pid, 0,
                            _sensor_configs[curr_path]._overload_value.length());
+
+                    fprintf(stdout, "POST: %ld(%ld, %ld, %ld)\n",
+                        regs.uregs[7],
+                        regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 }
             }
 
