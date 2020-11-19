@@ -251,7 +251,7 @@ void MockSensor::init()
                         _sensor_configs[curr_path]._overload_value.data(),
                         _sensor_configs[curr_path]._overload_value.length());
 
-                    std::cout << "Injecting value " << _sensor_configs[curr_path].overload_value;
+                    std::cout << "Injecting value " << _sensor_configs[curr_path]._overload_value;
                     std::cout << " into " << curr_path << std::endl;
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
