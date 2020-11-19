@@ -93,8 +93,8 @@ void MockSensor::updateConfig(const int path_id)
             std::cin >> delay;
         }
 
-        std::string curr_path = _paths[path_id];
         std::lock_guard<std::mutex> config_lock(_sensor_configs_mutex);
+        std::string curr_path = _paths[path_id];
         _sensor_configs[curr_path]._to_overload = overload;
         _sensor_configs[curr_path]._set_error = set_error;
         _sensor_configs[curr_path]._delay = delay;
@@ -217,10 +217,11 @@ void MockSensor::init()
             }
 
             // at this point, the call must be a read call
-            std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
+            std::unique_lock<std::mutex> configs_lock(_sensor_configs_mutex);
             if (_fd_to_path.find(regs.uregs[0]) !=  _fd_to_path.end() && 
                 _sensor_configs[_fd_to_path[regs.uregs[0]]]._to_overload)
             {
+                configs_lock.unlock();
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
 
                 long new_syscall = -1;
@@ -234,6 +235,7 @@ void MockSensor::init()
                        0, &regs);
 
                 // error injection
+                configs_lock.lock();
                 if (_sensor_configs[curr_path]._set_error)
                 {
                     long error_return = -1;
@@ -277,17 +279,42 @@ void MockSensor::run()
     while (true)
     {
         printConfigs();
-
         int option;
-        std::cout << "Enter -1 to exit, ID number to overload" << std::endl;
-        std::cin >> option;
+        try {
+            std::cout << "Enter -1 to exit, -2 to sleep, 
+                      ID number to overload" << std::endl;
+            std::cin >> option;
+        } 
+        catch (std::runtime_error& e)
+        {
+            std::cout << "Input error:" << std::endl;
+            std::cout << e.what() << std::endl;
+            continue;
+        }
         
         if (option == -1)
         {
             break;
         }
 
-        if (option < -1 || option >= static_cast<int>(_paths.size()))
+        if (option == -2)
+        {
+            std::cout << "Enter amount to sleep in seconds" << std::endl;
+            std::cin >> option;
+
+            if (option < 0)
+            {
+                std::cout << "Invalid input" << std::endl;
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+
+            std::cout << "Sleeping for " << option << " seconds." << std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(option));
+            continue;
+        }
+
+        if (option < -2 || option >= static_cast<int>(_paths.size()))
         {
             std::cout << "Invalid input" << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(2));

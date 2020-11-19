@@ -51,6 +51,7 @@
         "xutility": "cpp",
         "mutex": "cpp",
         "sstream": "cpp",
-        "xthread": "cpp"
+        "xthread": "cpp",
+        "condition_variable": "cpp"
     }
 }
