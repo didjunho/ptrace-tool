@@ -223,6 +223,7 @@ void MockSensor::init()
             {
                 configs_lock.unlock();
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
+                std::cout << "Overloading read from sensor: " << curr_path << std::endl;
 
                 long new_syscall = -1;
                 ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), _pid, 
@@ -249,6 +250,9 @@ void MockSensor::init()
                     memcpy(&new_sensor_val,
                         _sensor_configs[curr_path]._overload_value.data(),
                         _sensor_configs[curr_path]._overload_value.length());
+
+                    std::cout << "Injecting value " << _sensor_configs[curr_path];
+                    std::cout << " into " << curr_path << std::endl;
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
