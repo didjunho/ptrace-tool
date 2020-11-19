@@ -281,8 +281,7 @@ void MockSensor::run()
         printConfigs();
         int option;
         try {
-            std::cout << "Enter -1 to exit, -2 to sleep, 
-                      ID number to overload" << std::endl;
+            std::cout << "Enter -1 to exit, -2 to sleep, ID number to overload" << std::endl;
             std::cin >> option;
         } 
         catch (std::runtime_error& e)
