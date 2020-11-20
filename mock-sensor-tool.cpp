@@ -152,13 +152,13 @@ void MockSensor::init()
             ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid, 0,
                    &regs);
 
-            if (regs.uregs[7] != SYS_READ && regs.uregs[7] != SYS_OPEN) 
+            if (regs.uregs[7] != SYS_READ && regs.uregs[7] != SYS_OPEN)
             {
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 continue;
             }
 
-            if (regs.uregs[7] == SYS_OPEN) 
+            if (regs.uregs[7] == SYS_OPEN)
             {
                 ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
@@ -221,7 +221,6 @@ void MockSensor::init()
             if (_fd_to_path.find(regs.uregs[0]) !=  _fd_to_path.end() && 
                 _sensor_configs[_fd_to_path[regs.uregs[0]]]._to_overload)
             {
-                configs_lock.unlock();
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
                 std::cout << "Overloading read from sensor: " << curr_path << std::endl;
 
@@ -236,7 +235,6 @@ void MockSensor::init()
                        0, &regs);
 
                 // error injection
-                configs_lock.lock();
                 if (_sensor_configs[curr_path]._set_error)
                 {
                     long error_return = -1;
@@ -260,10 +258,6 @@ void MockSensor::init()
                     ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
                     ptrace(PTRACE_POKEUSER, _pid, 0,
                            _sensor_configs[curr_path]._overload_value.length());
-
-                    //fprintf(stdout, "POST: %ld(%ld, %ld, %ld)\n",
-                    //    regs.uregs[7],
-                    //    regs.uregs[0], regs.uregs[1], regs.uregs[2]);
                 }
             }
 
