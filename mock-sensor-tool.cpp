@@ -251,6 +251,7 @@ void MockSensor::init()
 
                     std::cout << "Injecting value " << _sensor_configs[curr_path]._overload_value;
                     std::cout << " into " << curr_path << " with " << regs.uregs[2] << " bytes" << std::endl;
+                    std::cout << std::hex << new_sensor_val << std::dec << std::endl;
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
