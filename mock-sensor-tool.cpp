@@ -245,20 +245,20 @@ void MockSensor::init()
                 else
                 {
                     size_t val_length = _sensor_configs[curr_path]._overload_value.length();
-                    int padding = ((val_length + 1) % sizeof(long) == 0) ? 0 : 
-                    ((val_length + 1) / sizeof(long) + 1)*sizeof(long) - (val_length + 1);
+                    int padding = (val_length % sizeof(long) == 0) ? 0 : 
+                    ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
 
-                    char overload[val_length + 1 + padding];
-                    memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length + 1);
+                    char overload[val_length + padding];
+                    memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length);
 
-                    int upper_bound = (val_length + 1 + padding)/sizeof(long);
+                    int upper_bound = (val_length + padding)/sizeof(long);
 
                     for (size_t i = 0; i < padding; ++i)
                     {
-                        overload[val_length + 1 + i] = '\0';
+                        overload[val_length + i] = '\0';
                     }
 
-                    std::cout << "Injecting size " << (val_length + 1 + padding) << std::endl;
+                    std::cout << "Injecting size " << (val_length + padding) << std::endl;
                     for (size_t i = 0; i < upper_bound; ++i)
                     {
                         long new_sensor_val;
