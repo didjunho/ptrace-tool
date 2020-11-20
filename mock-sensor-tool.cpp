@@ -253,6 +253,11 @@ void MockSensor::init()
 
                     int upper_bound = (val_length + 1 + padding)/sizeof(long);
 
+                    for (size_t i = 0; i < padding; ++i)
+                    {
+                        overload[val_length + 1 + i] = '\0';
+                    }
+
                     std::cout << "Injecting size " << (val_length + 1 + padding) << std::endl;
                     for (size_t i = 0; i < upper_bound; ++i)
                     {
