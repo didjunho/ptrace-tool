@@ -244,19 +244,30 @@ void MockSensor::init()
                 // value injection
                 else
                 {
-                    long new_sensor_val;
-                    memcpy(&new_sensor_val,
-                        _sensor_configs[curr_path]._overload_value.data(),
-                        _sensor_configs[curr_path]._overload_value.length());
+                    size_t val_length = _sensor_configs[curr_path]._overload_value.length();
+                    int padding = ((val_length + 1) % sizeof(long) == 0) ? 0 : 
+                    ((val_length + 1) / sizeof(long) + 1)*sizeof(long) - (val_length + 1);
 
-                    std::cout << "Injecting value " << _sensor_configs[curr_path]._overload_value;
-                    std::cout << " into " << curr_path << " with " << regs.uregs[2] << " bytes" << std::endl;
-                    std::cout << std::hex << new_sensor_val << std::dec << std::endl;
+                    char overload[val_length + 1 + padding];
+                    memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length + 1);
+
+                    int upper_bound = (val_length + 1 + padding)/sizeof(long);
+
+                    std::cout << "Injecting size " << (val_length + 1 + padding) << std::endl;
+                    for (size_t i = 0; i < upper_bound; ++i)
+                    {
+                        long new_sensor_val;
+                        memcpy(&new_sensor_val,
+                               overload + sizeof(long)*i,
+                               sizeof(long));
+
+                        std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
+                        ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + sizeof(long)*i, new_sensor_val);
+                    }
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
                     
-                    ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
                     ptrace(PTRACE_POKEUSER, _pid, 0,
                            _sensor_configs[curr_path]._overload_value.length());
 
