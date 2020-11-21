@@ -5,6 +5,7 @@
 #include <chrono>
 #include <sstream>
 #include <iostream>
+#include <stdio.h>
 
 MockSensor::MockSensor(pid_t pid_in) :
     _is_active(true), _num_sensors(1), _pid(pid_in)
@@ -208,7 +209,7 @@ void MockSensor::init()
                 std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
                 if (_sensor_configs.find(path) == _sensor_configs.end()) 
                 {
-                    _sensor_configs[path] = {false, false, 0, 0, ""};
+                    _sensor_configs[path] = {false, false, true, 0, 0, ""};
                     _paths.push_back(path);
                 }
 
@@ -244,41 +245,52 @@ void MockSensor::init()
                 // value injection
                 else
                 {
-                    size_t val_length = _sensor_configs[curr_path]._overload_value.length();
-                    int padding = (val_length % sizeof(long) == 0) ? 0 : 
-                    ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
-
-                    char overload[val_length + padding];
-                    memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length);
-
-                    int upper_bound = (val_length + padding)/sizeof(long);
-
-                    for (size_t i = 0; i < padding; ++i)
+                    // overload and return bytes read
+                    if (_sensor_configs[curr_path]._read_type)
                     {
-                        overload[val_length + i] = '\0';
+                        size_t val_length = _sensor_configs[curr_path]._overload_value.length();
+                        int padding = (val_length % sizeof(long) == 0) ? 0 : 
+                        ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
+
+                        char overload[val_length + padding];
+                        memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length);
+
+                        int upper_bound = (val_length + padding)/sizeof(long);
+
+                        for (size_t i = 0; i < padding; ++i)
+                        {
+                            overload[val_length + i] = '\0';
+                        }
+
+                        std::cout << "Injecting size " << (val_length + padding) << std::endl;
+                        for (size_t i = 0; i < upper_bound; ++i)
+                        {
+                            long new_sensor_val;
+                            memcpy(&new_sensor_val,
+                                overload + sizeof(long)*i,
+                                sizeof(long));
+
+                            std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
+                            ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + sizeof(long)*i, new_sensor_val);
+                        }
+                        
+                        ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
+                    }
+                    // return EOF
+                    else
+                    {
+                        ptrace(PTRACE_POKEUSER, _pid, 0, 0);
                     }
 
-                    std::cout << "Injecting size " << (val_length + padding) << std::endl;
-                    for (size_t i = 0; i < upper_bound; ++i)
-                    {
-                        long new_sensor_val;
-                        memcpy(&new_sensor_val,
-                               overload + sizeof(long)*i,
-                               sizeof(long));
-
-                        std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
-                        ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + sizeof(long)*i, new_sensor_val);
-                    }
-
-                    std::this_thread::sleep_for(std::chrono::milliseconds(
-                                            _sensor_configs[curr_path]._delay));
-                    
-                    ptrace(PTRACE_POKEUSER, _pid, 0, 0);
+                    _sensor_configs[curr_path]._read_type = !_sensor_configs[curr_path]._read_type;
 
                     ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
                     
                     std::cout << "returning value: " << regs.uregs[0] << std::endl;
+
+                    std::this_thread::sleep_for(std::chrono::milliseconds(
+                                            _sensor_configs[curr_path]._delay));
                 }
             }
 

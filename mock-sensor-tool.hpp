@@ -27,6 +27,7 @@ static constexpr auto SYS_OPEN = 322;
 struct MockSensorSettings {
     bool _to_overload; 
     bool _set_error;
+    bool _read_type;
     int _delay;
     int _errno_code;
     std::string _overload_value;
