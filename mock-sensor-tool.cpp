@@ -279,7 +279,7 @@ void MockSensor::init()
                     // return EOF
                     else
                     {
-                        ptrace(PTRACE_POKEUSER, _pid, 0, 0);
+                        ptrace(PTRACE_POKEUSER, _pid, 0, 1);
                     }
 
                     _sensor_configs[curr_path]._read_type = !_sensor_configs[curr_path]._read_type;
