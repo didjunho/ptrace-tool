@@ -223,7 +223,7 @@ void MockSensor::init()
                 _sensor_configs[_fd_to_path[regs.uregs[0]]]._to_overload)
             {
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
-                std::cout << "Overloading read from sensor: " << curr_path << " with " << regs.uregs[2] << " bytes" << std::endl;
+                //std::cout << "Overloading read from sensor: " << curr_path << " with " << regs.uregs[2] << " bytes" << std::endl;
 
                 long new_syscall = -1;
                 ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), _pid, 
@@ -250,12 +250,12 @@ void MockSensor::init()
                     int padding = (val_length % sizeof(long) == 0) ? 0 : 
                     ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
 
-                    char overload[val_length + padding];
+                    char overload[val_length + padding + 10];
                     memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length);
 
                     int upper_bound = (val_length + padding)/sizeof(long);
 
-                    for (size_t i = 0; i < padding; ++i)
+                    for (size_t i = 0; i < padding + 10; ++i)
                     {
                         overload[val_length + i] = '\0';
                     }
@@ -273,7 +273,7 @@ void MockSensor::init()
                     }
                     
                     //ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
-                    ptrace(PTRACE_POKEUSER, _pid, 0, 0);
+                    ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
 
                     ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
