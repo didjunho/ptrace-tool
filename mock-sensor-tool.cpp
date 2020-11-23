@@ -260,7 +260,7 @@ void MockSensor::init()
                         overload[val_length + i] = '\0';
                     }
 
-                    std::cout << "Injecting size " << (val_length + padding) << std::endl;
+                    //std::cout << "Injecting size " << (val_length + padding) << std::endl;
                     for (size_t i = 0; i < upper_bound; ++i)
                     {
                         long new_sensor_val;
@@ -268,16 +268,17 @@ void MockSensor::init()
                             overload + sizeof(long)*i,
                             sizeof(long));
 
-                        std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
+                        //std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
                         ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + sizeof(long)*i, new_sensor_val);
                     }
                     
-                    ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
+                    //ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
+                    ptrace(PTRACE_POKEUSER, _pid, 0, 0);
 
                     ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                        0, &regs);
                     
-                    std::cout << "returning value: " << regs.uregs[0] << std::endl;
+                    //std::cout << "returning value: " << regs.uregs[0] << std::endl;
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
