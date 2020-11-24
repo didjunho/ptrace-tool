@@ -269,9 +269,8 @@ void MockSensor::init()
                                sizeof(long));
 
                         //std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
-                        //ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + (sizeof(long)*i), new_sensor_val);
-                        ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
-                        break;
+                        ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + (sizeof(long)*i), new_sensor_val);
+                        //ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
                     }
                     
                     //ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
