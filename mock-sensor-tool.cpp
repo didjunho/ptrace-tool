@@ -275,7 +275,7 @@ void MockSensor::init()
                     }
                     
                     //ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
-                    ptrace(PTRACE_POKEUSER, _pid, 0, 4);
+                    ptrace(PTRACE_POKEUSER, _pid, 0, val_length + padding + 1);
 
                     //ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
                     //   0, &regs);
