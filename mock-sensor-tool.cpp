@@ -245,7 +245,7 @@ void MockSensor::init()
                 else
                 {
                     size_t val_length = _sensor_configs[curr_path]._overload_value.length();
-                    int padding = (val_length % sizeof(long) == 0) ? 0 : 
+                    int padding = (val_length % sizeof(long) == 0) ? 4 : 
                     ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
 
                     char overload[val_length + padding];
@@ -255,7 +255,7 @@ void MockSensor::init()
 
                     int upper_bound = (val_length + padding)/sizeof(long);
 
-                    for (size_t i = 0; i < padding ; ++i)
+                    for (size_t i = 0; i < padding; ++i)
                     {
                         overload[val_length + i] = '\0';
                     }
