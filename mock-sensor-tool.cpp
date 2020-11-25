@@ -119,7 +119,7 @@ void MockSensor::init()
     }
 
     int wstatus;
-    while (true) 
+    while (true)
     {
         waitpid(_pid, &wstatus, 0);
         if (WIFSTOPPED(wstatus) && WSTOPSIG(wstatus) == SIGSTOP) 
@@ -134,7 +134,7 @@ void MockSensor::init()
 
     ptrace(PTRACE_SETOPTIONS, _pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, _pid, 0, 0);
-    while (true) 
+    while (true)
     {
         std::unique_lock<std::mutex> active_lock(_is_active_mutex);
         if (!_is_active)
@@ -144,7 +144,7 @@ void MockSensor::init()
         active_lock.unlock();
 
         waitpid(_pid, &wstatus, 0);
-        if (WIFEXITED(wstatus)) 
+        if (WIFEXITED(wstatus))
         {
             break;
         }
@@ -223,7 +223,6 @@ void MockSensor::init()
                 _sensor_configs[_fd_to_path[regs.uregs[0]]]._to_overload)
             {
                 std::string curr_path = _fd_to_path[regs.uregs[0]];
-                //std::cout << "Overloading read from sensor: " << curr_path << " with " << regs.uregs[2] << " bytes" << std::endl;
 
                 long new_syscall = -1;
                 ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), _pid, 
@@ -245,22 +244,22 @@ void MockSensor::init()
                 // value injection
                 else
                 {
-                    // overload and return bytes read
                     size_t val_length = _sensor_configs[curr_path]._overload_value.length();
                     int padding = (val_length % sizeof(long) == 0) ? 0 : 
                     ((val_length / sizeof(long)) + 1)*sizeof(long) - (val_length);
 
-                    char overload[val_length + padding + 10];
-                    memcpy(overload, _sensor_configs[curr_path]._overload_value.data(), val_length);
+                    char overload[val_length + padding];
+                    memcpy(overload, 
+                           _sensor_configs[curr_path]._overload_value.data(),
+                           val_length);
 
                     int upper_bound = (val_length + padding)/sizeof(long);
 
-                    for (size_t i = 0; i < padding + 10; ++i)
+                    for (size_t i = 0; i < padding ; ++i)
                     {
                         overload[val_length + i] = '\0';
                     }
 
-                    //std::cout << "Injecting size " << (val_length + padding) << std::endl;
                     for (size_t i = 0; i < upper_bound; ++i)
                     {
                         long new_sensor_val;
@@ -268,18 +267,11 @@ void MockSensor::init()
                                overload + sizeof(long)*i,
                                sizeof(long));
 
-                        //std::cout << "Injecting word: " << std::hex << new_sensor_val << std::dec << std::endl;
-                        ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1] + (sizeof(long)*i), new_sensor_val);
-                        //ptrace(PTRACE_POKEDATA, _pid, regs.uregs[1], new_sensor_val);
+                        ptrace(PTRACE_POKEDATA, _pid,
+                               regs.uregs[1] + (sizeof(long)*i), new_sensor_val);
                     }
                     
-                    //ptrace(PTRACE_POKEUSER, _pid, 0, val_length);
-                    ptrace(PTRACE_POKEUSER, _pid, 0, val_length + padding + 1);
-
-                    //ptrace(static_cast<__ptrace_request>(PTRACE_GETREGS), _pid,
-                    //   0, &regs);
-                    
-                    //std::cout << "returning value: " << regs.uregs[0] << std::endl;
+                    ptrace(PTRACE_POKEUSER, _pid, 0, regs.uregs[2]);
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
                                             _sensor_configs[curr_path]._delay));
