@@ -4,8 +4,8 @@
 #include <sys/reg.h>
 
 #include <chrono>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 MockSensor::MockSensor(pid_t pid_in) :
     _is_active(true), _num_sensors(1), _pid(pid_in)
@@ -30,19 +30,17 @@ void MockSensor::printConfigs()
 
         if (_sensor_configs[_paths[i]]._set_error)
         {
-            std::cout << "Injecting with error " 
-                      << _sensor_configs[_paths[i]]._errno_code 
-                      << " with "
-                      << _sensor_configs[_paths[i]]._delay 
-                      << " ms of delay" << std::endl;
+            std::cout << "Injecting with error "
+                      << _sensor_configs[_paths[i]]._errno_code << " with "
+                      << _sensor_configs[_paths[i]]._delay << " ms of delay"
+                      << std::endl;
         }
         else
         {
-            std::cout << "Injecting with value " 
-                      << _sensor_configs[_paths[i]]._overload_value 
-                      << " with "
-                      << _sensor_configs[_paths[i]]._delay 
-                      << " ms of delay" << std::endl;
+            std::cout << "Injecting with value "
+                      << _sensor_configs[_paths[i]]._overload_value << " with "
+                      << _sensor_configs[_paths[i]]._delay << " ms of delay"
+                      << std::endl;
         }
     }
 }
@@ -68,11 +66,12 @@ void MockSensor::updateConfig(const int path_id)
 
             if (set_error)
             {
-                // 0, 41, 58 and numbers greater than 124 are invalid errno codes
+                // 0, 41, 58 and numbers greater than 124 are invalid errno
+                // codes
                 std::cout << "Insert errno code to inject" << std::endl;
                 std::cin >> errno_code;
-                if (errno_code == 0 || errno_code == 41 || 
-                    errno_code == 58 || errno_code > 124)
+                if (errno_code == 0 || errno_code == 41 || errno_code == 58 ||
+                    errno_code > 124)
                 {
                     throw std::runtime_error("Bad errno value");
                 }
@@ -110,23 +109,23 @@ void MockSensor::updateConfig(const int path_id)
     }
 }
 
-void MockSensor::init() 
+void MockSensor::init()
 {
-    if (ptrace(PTRACE_ATTACH, _pid, 0, 0) < 0) 
+    if (ptrace(PTRACE_ATTACH, _pid, 0, 0) < 0)
     {
         std::perror("ptrace(PTRACE_ATTACH) error");
         exit(EXIT_FAILURE);
     }
 
     int wstatus;
-    while (true) 
+    while (true)
     {
         waitpid(_pid, &wstatus, 0);
-        if (WIFSTOPPED(wstatus) && WSTOPSIG(wstatus) == SIGSTOP) 
+        if (WIFSTOPPED(wstatus) && WSTOPSIG(wstatus) == SIGSTOP)
         {
             break;
         }
-        else 
+        else
         {
             ptrace(PTRACE_CONT, _pid, (caddr_t)1, 0);
         }
@@ -135,7 +134,7 @@ void MockSensor::init()
     ptrace(PTRACE_SETOPTIONS, _pid, 0, PTRACE_O_TRACESYSGOOD);
     ptrace(PTRACE_SYSCALL, _pid, 0, 0);
 
-    while (true) 
+    while (true)
     {
         std::unique_lock<std::mutex> active_lock(_is_active_mutex);
         if (!_is_active)
@@ -145,22 +144,23 @@ void MockSensor::init()
         active_lock.unlock();
 
         waitpid(_pid, &wstatus, 0);
-        if (WIFEXITED(wstatus)) 
+        if (WIFEXITED(wstatus))
         {
             break;
         }
-        else {
+        else
+        {
             struct user_regs_struct regs;
             ptrace(PTRACE_GETREGS, _pid, 0, &regs);
 
             // 0 = READ, 257 = OPENAT for x86 64bit
-            if (regs.orig_rax != 0 && regs.orig_rax != 257) 
+            if (regs.orig_rax != 0 && regs.orig_rax != 257)
             {
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 continue;
             }
 
-            if (regs.orig_rax == 257) 
+            if (regs.orig_rax == 257)
             {
                 ptrace(PTRACE_GETREGS, _pid, 0, &regs);
                 int i = 0;
@@ -168,28 +168,28 @@ void MockSensor::init()
                 bool reached_end = false;
 
                 // extract the file pathname out of memory
-                while (!reached_end) 
+                while (!reached_end)
                 {
                     std::stringstream ss;
-                    ss << std::hex << ptrace(PTRACE_PEEKDATA, _pid, 
-                                             regs.rsi + i*sizeof(long));
+                    ss << std::hex
+                       << ptrace(PTRACE_PEEKDATA, _pid,
+                                 regs.rsi + i * sizeof(long));
                     std::string path_chunk;
                     ss >> path_chunk;
-                    
+
                     // 16 for 64 bit, 8 for 32 bit
-                    if (path_chunk.size() != 16) 
+                    if (path_chunk.size() != 16)
                     {
                         break;
                     }
 
                     // j = 7 for 64 bit, j = 3 for 32 bit
-                    for (int j = 7; j >= 0; --j) 
+                    for (int j = 7; j >= 0; --j)
                     {
-                        char next_char = static_cast<char>(
-                            std::stoul(path_chunk.substr(j*2, 2), nullptr, 16)
-                        );
+                        char next_char = static_cast<char>(std::stoul(
+                            path_chunk.substr(j * 2, 2), nullptr, 16));
 
-                        if (next_char == '\0') 
+                        if (next_char == '\0')
                         {
                             reached_end = true;
                             break;
@@ -208,7 +208,7 @@ void MockSensor::init()
                 _fd_to_path[regs.rax] = path;
 
                 std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
-                if (_sensor_configs.find(path) == _sensor_configs.end()) 
+                if (_sensor_configs.find(path) == _sensor_configs.end())
                 {
                     _sensor_configs[path] = {false, false, 0, 0, ""};
                     _paths.push_back(path);
@@ -220,14 +220,15 @@ void MockSensor::init()
 
             // at this point, the call must be a read call
             std::lock_guard<std::mutex> configs_lock(_sensor_configs_mutex);
-            if (_fd_to_path.find(regs.rdi) !=  _fd_to_path.end() && 
+            if (_fd_to_path.find(regs.rdi) != _fd_to_path.end() &&
                 _sensor_configs[_fd_to_path[regs.rdi]]._to_overload)
             {
                 std::string curr_path = _fd_to_path[regs.rdi];
 
                 // overload syscall here to avoid the limited bytes bug
-                //long new_syscall = -1;
-                //ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL), pid, 0, new_syscall);
+                // long new_syscall = -1;
+                // ptrace(static_cast<__ptrace_request>(PTRACE_SET_SYSCALL),
+                // pid, 0, new_syscall);
 
                 ptrace(PTRACE_SYSCALL, _pid, 0, 0);
                 waitpid(_pid, &wstatus, 0);
@@ -235,7 +236,7 @@ void MockSensor::init()
                 ptrace(PTRACE_GETREGS, _pid, 0, &regs);
 
                 // debug
-                //fprintf(stdout, "POST: %llu(%llu, %llu, %llu) = %llu\n",
+                // fprintf(stdout, "POST: %llu(%llu, %llu, %llu) = %llu\n",
                 //        regs.orig_rax,
                 //        regs.rdi, regs.rsi, regs.rdx, regs.rax);
 
@@ -243,7 +244,7 @@ void MockSensor::init()
                 if (_sensor_configs[curr_path]._set_error)
                 {
                     long error_return = -1;
-                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long)*RAX, 
+                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long) * RAX,
                            error_return);
 
                     errno = _sensor_configs[curr_path]._errno_code;
@@ -253,15 +254,15 @@ void MockSensor::init()
                 {
                     long new_sensor_val;
                     memcpy(&new_sensor_val,
-                        _sensor_configs[curr_path]._overload_value.data(),
-                        _sensor_configs[curr_path]._overload_value.length());
+                           _sensor_configs[curr_path]._overload_value.data(),
+                           _sensor_configs[curr_path]._overload_value.length());
 
                     std::this_thread::sleep_for(std::chrono::milliseconds(
-                                            _sensor_configs[curr_path]._delay));
-                    
+                        _sensor_configs[curr_path]._delay));
+
                     ptrace(PTRACE_POKEDATA, _pid, regs.rsi, new_sensor_val);
-                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long)*RAX,
-                        _sensor_configs[curr_path]._overload_value.length());
+                    ptrace(PTRACE_POKEUSER, _pid, sizeof(long) * RAX,
+                           _sensor_configs[curr_path]._overload_value.length());
                 }
             }
 
@@ -270,7 +271,7 @@ void MockSensor::init()
     }
 }
 
-void MockSensor::run() 
+void MockSensor::run()
 {
     std::thread t1(&MockSensor::init, this);
     _init_thread = std::move(t1);
@@ -285,7 +286,7 @@ void MockSensor::run()
         int option;
         std::cout << "Enter -1 to exit, ID number to overload" << std::endl;
         std::cin >> option;
-        
+
         if (option == -1)
         {
             break;
