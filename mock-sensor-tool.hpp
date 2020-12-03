@@ -1,14 +1,17 @@
+#include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <sys/ioctl.h>
-#include <sys/wait.h>
 #include <sys/ptrace.h>
+// asm/ptrace.h MUST come after sys/ptrace.h for symbol definition purposes
+// clang-format off
 #include <asm/ptrace.h>
+// clang-format on
 #include <sys/syscall.h>
+#include <sys/types.h>
 #include <sys/user.h>
+#include <sys/wait.h>
 #include <unistd.h>
-#include <errno.h>
 
 #include <mutex>
 #include <string>
