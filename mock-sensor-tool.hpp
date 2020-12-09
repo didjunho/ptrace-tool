@@ -22,6 +22,13 @@
 static constexpr auto SYS_READ = 3;
 static constexpr auto SYS_OPEN = 322;
 
+/* @brief Number of seconds for the mock sensor tool to detect sensors on
+ * startup */
+static constexpr auto START_PERIOD = 5;
+
+/* @brief Number of seconds to wait after user input error */
+static constexpr auto ERROR_PERIOD = 2;
+
 /** @struct MockSensorSettings
  *  @brief Represents one user defined sensor configuration.
  *
@@ -29,11 +36,11 @@ static constexpr auto SYS_OPEN = 322;
  */
 struct MockSensorSettings
 {
-    bool _to_overload;
-    bool _set_error;
-    int _delay;
-    int _errno_code;
-    std::string _overload_value;
+    bool toOverload;
+    bool setError;
+    uint64_t delay;
+    uint8_t errnoCode;
+    std::string overloadValue;
 };
 
 /** @class MockSensorInterface
@@ -69,10 +76,10 @@ class MockSensor : MockSensorInterface
 
     /** @brief Constructor
      *
-     *  @param[in] pid_in - pid of the phosphor-hwmon or dbus-sensors
+     *  @param[in] pidIn - pid of the phosphor-hwmon or dbus-sensors
      *                      instance to overload.
      */
-    explicit MockSensor(const pid_t pid_in);
+    explicit MockSensor(const pid_t pidIn);
 
   private:
     /** @brief Print all existing configurations.
@@ -87,14 +94,21 @@ class MockSensor : MockSensorInterface
      *  Takes in a user specified path id variable and allows the user
      *  to update values for the sensor associated with that path id.
      *
-     *  @param[in] path_id - The path whose configs the user wants to update.
+     *  @param[in] pathId - The path whose configs the user wants to update.
      */
-    void updateConfig(const int path_id);
+    void updateConfig(const int pathId);
+
+    /** @brief Helper fuinction for init()
+     *
+     *  Retrieves the path of a file out of memory
+     */
+    inline std::string extractPath(const pt_regs& regs);
 
     /** @brief Retrieves all connected sensors and overloads sensor values
      *         based on user specified configurations.
      *
-     *  Picks up all files that are opened within a 5 second window.
+     *  Picks up all files that are opened within a window of time specified by
+     * START_PERIOD.
      */
     void init() override;
 
@@ -109,39 +123,39 @@ class MockSensor : MockSensorInterface
      *
      *  Used for cleanup purposes
      */
-    bool _is_active;
+    bool isActive;
 
     /** @brief Number of detected sensors */
-    int _num_sensors;
+    int numSensors;
 
     /** @brief PID of the tracee process */
-    pid_t _pid;
+    pid_t pid;
 
     /** @brief The map of all sensor paths to their configurations
      *
      *  Since each physical hwmon sensor is set to a defined sysfs file,
      *  we can get a unique identifer for each sensor with its path.
      */
-    std::unordered_map<std::string, MockSensorSettings> _sensor_configs;
+    std::unordered_map<std::string, MockSensorSettings> sensorConfigs;
 
     /** @brief Maps a file descriptor to its associated path at any time
      *
      *  As file descriptors change, this map continuously updates the file
      *  descriptors associated with each path.
      */
-    std::unordered_map<long, std::string> _fd_to_path;
+    std::unordered_map<long, std::string> fdToPath;
 
     /** @brief list of all relevant sensor paths */
-    std::vector<std::string> _paths;
+    std::vector<std::string> paths;
 
-    /** @brief used to lock the _is_active data member */
-    std::mutex _is_active_mutex;
+    /** @brief used to lock the isActive data member */
+    std::mutex isActiveMutex;
 
-    /** @brief used to lock the _sensor_configs and _fd_to_path data members */
-    std::mutex _sensor_configs_mutex;
+    /** @brief used to lock the sensorConfigs and fdToPath data members */
+    std::mutex sensorConfigsMutex;
 
     /** @brief used to keep the init() thread running throughout the duration
      *         of the program
      */
-    std::thread _init_thread;
+    std::thread initThread;
 };
